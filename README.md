@@ -96,6 +96,21 @@ See the last three lines: `proxyName`, `proxyPort` and `scheme`.
 * `proxyPort` - port to which Catalina will redirect (you can have https running on 8002 port using this)
 * `scheme` - this determine if you want to use http or https
 
+## Testing locally
+
+Terraform need to be tested on AWS, so just scroll up for a quick introduction how to create and destroy environments.
+
+To test Ansible, you'll need installed Vagrant and Ansible on your local computer.
+
+Testing:
+```
+vagrant up
+```
+
+This should download Vagrant box and run Ansible playbook that will install nginx and Bamboo for you. Use `vagrant ssh` to log in to the machine and investigate configuration.
+
+To remove the machine, run `vagrant destroy` and confirm destroying this VM
+
 ## Conclusion
 
 I know it's not an ideal solution and there are couple of quirks I will need to get rid of, but it's been developed just to avoid lock-in after Atlassian cancelled Bamboo cloud and it's a temporary solution for moving to other CI. Most likely I won't work on this anytime soon, but you're welcome to send pull requests if you have some improvements. Thanks!
