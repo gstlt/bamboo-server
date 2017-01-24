@@ -1,0 +1,9 @@
+---
+
+- name: Upgrade cache and all packages before we start
+  shell: apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade
+
+- include: nginx.yml
+- include: java.yml
+- include: bamboo.yml
+

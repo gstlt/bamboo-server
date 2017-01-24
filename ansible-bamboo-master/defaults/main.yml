@@ -1,0 +1,17 @@
+---
+# defaults file for bamboo
+
+bamboo_prerequisites:
+  - python-dev
+  - python-pip
+bamboo_version:   5.14.4.1
+bamboo_baseurl:   http://www.atlassian.com/software/bamboo/downloads/binary
+bamboo_installer: atlassian-bamboo-{{ bamboo_version }}.tar.gz
+bamboo_user:      bamboo
+# use postgresql or mysql
+bamboo_dbconnector: postgresql
+bamboo_tmp:       /var/tmp
+bamboo_installto: /opt
+bamboo_datadir:   /srv/atlassian/bamboo-data
+bamboo_dbname:    bamboo
+bamboo_dbuser:    bamboo

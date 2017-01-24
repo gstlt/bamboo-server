@@ -1,0 +1,30 @@
+---
+- name: Install Nginx packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - nginx
+
+- name: Remove default config
+  file:
+    path: '/etc/nginx/sites-enabled/default'
+    state: absent
+  notify:
+  - reload nginx
+
+- name: Upload Nginx configuration vhost
+  template:
+    src: nginx-bamboo.j2
+    dest: "/etc/nginx/sites-available/bamboo"
+
+- name: Symlink configuration to sites-enabled
+  file:
+    state: link
+    src: "/etc/nginx/sites-available/bamboo"
+    dest: "/etc/nginx/sites-enabled/bamboo"
+  notify:
+   - reload nginx
+
+- name: Ensure nginx is started and enabled to start at boot.
+  service: name=nginx state=started enabled=yes

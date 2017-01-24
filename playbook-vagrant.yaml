@@ -1,0 +1,8 @@
+- hosts: all
+  remote_user: ubuntu
+  become: yes
+  vars_files:
+    - ./vars.yaml
+  roles:
+    - ansible-bamboo-master
+

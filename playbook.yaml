@@ -1,0 +1,6 @@
+- hosts: all
+  remote_user: ubuntu
+  become: yes
+  roles:
+    - ansible-bamboo-master
+

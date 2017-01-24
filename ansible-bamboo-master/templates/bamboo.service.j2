@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Atlassian Bamboo server
+After=syslog.target network.target
+
+[Service]
+Type=forking
+User=bamboo
+ExecStart=/opt/atlassian/bamboo-{{ bamboo_version }}/bin/start-bamboo.sh
+ExecStop=/opt/atlassian/bamboo-{{ bamboo_version }}/bin/stop-bamboo.sh
+
+[Install]
+WantedBy=multi-user.target
+

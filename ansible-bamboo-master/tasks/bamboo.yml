@@ -1,0 +1,112 @@
+---
+# tasks file for bamboo
+# vim: set ft=ansible ts=2 sw=2:
+
+#- name: Check for OS support
+#  fail:
+#    msg: "OS is not supported"
+#  when: ansible_os_family != 'RedHat'
+
+- name: Ensure prerequisite packages are installed
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ bamboo_prerequisites }}"
+
+- name: Ensure group exists
+  group:
+    name: "{{ bamboo_user }}"
+    state: present
+
+- name: Ensure user exists
+  user:
+    name: "{{ bamboo_user }}"
+    group: "{{ bamboo_user }}"
+    state: present
+
+- name: Fetch installer
+  get_url:
+    url: "{{ bamboo_baseurl }}/{{ bamboo_installer }}"
+    dest: "{{ bamboo_tmp }}/{{ bamboo_installer }}"
+  register: fetch
+
+- name: Extract installation
+  shell: tar xvf {{ bamboo_tmp }}/{{ bamboo_installer }} -C {{ bamboo_installto }} --transform='s#\(atlassian\)-#\1/#'
+  when: fetch.changed
+
+- name: Ensure consistent file ownership
+  file:
+    path: "{{ bamboo_installto }}/atlassian/bamboo-{{ bamboo_version}}"
+    recurse: true
+    owner: "{{ bamboo_user }}"
+    group: "{{ bamboo_user }}"
+
+- name: Ensure data dir exists
+  file:
+    path: "{{ bamboo_datadir }}"
+    state: directory
+    owner: "{{ bamboo_user }}"
+    group: "{{ bamboo_user }}"
+
+- name: Set data dir in tomcat config
+  lineinfile:
+    dest: "{{ bamboo_installto }}/atlassian/bamboo-{{ bamboo_version }}/atlassian-bamboo/WEB-INF/classes/bamboo-init.properties"
+    regexp: "^bamboo.home"
+    line: "bamboo.home={{ bamboo_datadir }}"
+    state: present
+
+- name: Ensure logs symlink exists
+  file:
+    src: "{{ bamboo_installto }}/atlassian/bamboo-{{ bamboo_version }}/logs"
+    path: /var/log/bamboo
+    state: link
+
+- name: Ensure service definition exists
+  template:
+    src: service.init.j2
+    dest: /etc/init.d/bamboo
+    owner: root
+    group: root
+    mode: 0755
+  when: ansible_distribution_major_version == 6
+
+- name: Ensure service definition exists
+  template:
+    src: bamboo.service.j2
+    dest: /etc/systemd/system/bamboo.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: add proxy config to Tomcat settings
+  template:
+    src: server.xml.j2
+    dest: /opt/atlassian/bamboo-{{ bamboo_version }}/conf/server.xml
+    owner: "{{ bamboo_user }}"
+    group: "{{ bamboo_user }}"
+    mode: 0644
+  when: bamboo_proxy is defined
+
+# login_user not specified, uses the module default. RTFM.
+#- name: Ensure database user exists
+#  postgresql_user:
+#    name: "{{ bamboo_dbuser }}"
+#    state: present
+#  sudo: yes
+#  sudo_user: postgres
+
+# login_user not specified, uses the module default. RTFM.
+#- name: Ensure database exists
+#  postgresql_db:
+#    name: "{{ bamboo_dbname }}"
+#    owner: "{{ bamboo_dbuser }}"
+#    state: present
+#  sudo: yes
+#  sudo_user: postgres
+
+- name: Ensure service is set to run
+  service:
+    name: bamboo
+    state: restarted
+    enabled: yes
+

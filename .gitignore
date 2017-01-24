@@ -1,0 +1,12 @@
+# vim .swp files
+*.swp
+
+# Terraform state
+terraform.tfstate*
+
+# Ansible *.retry files
+*.retry
+
+# Ignore various files
+*.log
+.vagrant

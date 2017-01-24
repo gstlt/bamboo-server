@@ -1,0 +1,75 @@
+#!/bin/sh
+# atlassian startup script
+# chkconfig: 2345 80 05
+# description: Atlassian bamboo service
+### BEGIN INIT INFO
+# Provides: bamboo
+# Required-Start: $local_fs $remote_fs $network $named $syslog $time
+# Required-Stop: $local_fs $remote_fs $network $named $syslog $time
+# Short-Description: start and stop an Atlassian service
+# Description: Atlassian bamboo Service
+### END INIT INFO
+
+# Define some variables
+# Name of app
+prog=bamboo
+# Name of the user to run as
+user=bamboo
+# Location of application's directory
+base={{ bamboo_installto }}/atlassian/${prog}-{{ bamboo_version }}
+# Location of Java JDK
+export JAVA_HOME=/usr/lib/jvm/jre
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source override configuration.
+[ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
+
+lockfile=/var/lock/subsys/$prog
+pidfile=/var/run/${prog}.pid
+
+rh_status() {
+    status -p $pidfile bamboo
+}
+
+case "$1" in
+    start)
+        if [ -f $lockfile ]; then
+            # already running
+            action $"Starting $prog: " /bin/true
+        else
+            action $"Starting $prog: " /bin/su -m $user -c "${base}/bin/start-${prog}.sh &> /dev/null"
+            ret=$?
+            if [ $ret -eq 0 ]; then
+                touch $lockfile
+                echo $(pgrep -fn $prog) > $pidfile
+            fi
+        fi
+    ;;
+    stop)
+        action $"Stopping $prog: " /bin/su -m $user -c "$base/bin/stop-${prog}.sh &> /dev/null"
+        ret=$?
+        if [ $ret -eq 0 ]; then
+            rm $lockfile $pidfile
+        fi
+    ;;
+    restart)
+        $0 stop
+        sleep 5
+        $0 start
+    ;;
+    status)
+        rh_status
+        RETVAL=$?
+        if [ $RETVAL -eq 3 -a -f $lockfile ] ; then
+                RETVAL=2
+        fi
+    ;;
+    *)
+        echo "Usage: /etc/init.d/$prog {start|restart|stop|status}"
+        exit 1
+    ;;
+esac
+
+exit 0
