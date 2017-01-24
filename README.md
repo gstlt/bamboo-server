@@ -7,7 +7,8 @@ Ansible is used for installing Bamboo
 ## Terraform usage
 
 Install Terraform downloaded from [this website](https://terraform.io)
-Place it in your `$PATH` variable for ease of use
+
+Place it in your `$PATH` variable for ease of use. You might also like [this Makefile](https://github.com/gstlt/dotfiles/tree/master/hashicorp) which will install also Packer if you want it to.
 
 You will need API keys to AWS to be able to use it. MFA + AssumeRole is not covered here.
 
