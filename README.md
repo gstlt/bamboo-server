@@ -41,6 +41,7 @@ Before running Terraform
 * create SSL certificate to be used on Load-Balancer (ELB)
 * update certificate name in `./terraform/bamboo-ec2.tf` file (search for mysuperdomain)
 * update ssh public key to access the EC2 instance (yes, you will need secret key too) - see terraform/ssh-keypairs.tf
+* update your IP address to be able to SSH into machine: `./terraform/security-groups.tf`
 
 How to request certificate documentation can be found [on this web page](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request.html)
 
